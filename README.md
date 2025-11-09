@@ -6,7 +6,7 @@
 
 <ins>The Strategic Imperative</ins>
 
-#### Instead of building every AI capability from scratch (which takes 2-3 years), Teradyne can acquire companies that already have:
+#### Instead of building every AI capability from scratch (which may take ~2-3 years), Teradyne can acquire companies that already have:
 
 - Proven AI algorithms for semiconductor test
 
