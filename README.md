@@ -15,6 +15,8 @@
 - Specialized talent in machine learning for manufacturing
 
 - Complementary software platforms
+  
+---
 
 
 #### In recent years, Teradyne acquired LitePoint, MiR and Quantifi Photonics. These are strategic acquisitions that immediately gave Teradyne good leverages in the domain of expertise of these acquisitions. 
@@ -268,6 +270,420 @@ if __name__ == "__main__":
 
 ---
 
+## Acquisition Financial Model
+
+#### <ins>Goal & Purpose</ins>
+
+Provide a simple, defensible valuation model (revenue multiple, EBITDA multiple, strategic premium), and visualize valuation ranges, recommended offer vs. revenue/EBITDA, and sensitivity to multiples. Plots illustrate valuation bands and the effect of strategic premium.
+
+```python
+
+# AcquisitionFinancialModel with visualizations
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style="whitegrid")
+
+class AcquisitionFinancialModel:
+    def __init__(self):
+        self.valuation_metrics = {
+            'revenue_multiple': [8.0, 12.0],
+            'ebitda_multiple': [15.0, 25.0],
+            'strategic_premium': 0.3  # 30%
+        }
+
+    def calculate_acquisition_valuation(self, target_financials):
+        revenue = target_financials['annual_revenue']
+        revenue_valuation = [
+            revenue * self.valuation_metrics['revenue_multiple'][0],
+            revenue * self.valuation_metrics['revenue_multiple'][1]
+        ]
+
+        if target_financials['ebitda_margin'] > 0:
+            ebitda = revenue * target_financials['ebitda_margin']
+            ebitda_valuation = [
+                ebitda * self.valuation_metrics['ebitda_multiple'][0],
+                ebitda * self.valuation_metrics['ebitda_multiple'][1]
+            ]
+        else:
+            ebitda_valuation = [0, 0]
+
+        strategic_valuation = [
+            max(revenue_valuation[0], ebitda_valuation[0]) * (1 + self.valuation_metrics['strategic_premium']),
+            max(revenue_valuation[1], ebitda_valuation[1]) * (1 + self.valuation_metrics['strategic_premium'])
+        ]
+
+        return {
+            'revenue_based_valuation': revenue_valuation,
+            'ebitda_based_valuation': ebitda_valuation,
+            'strategic_valuation_range': strategic_valuation,
+            'recommended_offer': strategic_valuation[0]
+        }
+
+    # -------------------------
+    # Visualization helpers
+    # -------------------------
+    def plot_valuation_ranges(self, target_financials, valuation_result):
+        """Plot revenue-based, EBITDA-based and strategic valuation ranges as bars"""
+        labels = ['Low', 'High']
+        rev = valuation_result['revenue_based_valuation']
+        ebit = valuation_result['ebitda_based_valuation']
+        strat = valuation_result['strategic_valuation_range']
+
+        df = pd.DataFrame({
+            'Revenue-based': rev,
+            'EBITDA-based': ebit,
+            'Strategic': strat
+        }, index=labels)
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        df.plot(kind='bar', ax=ax)
+        ax.set_ylabel('Valuation ($)')
+        ax.set_title(f"Valuation Ranges for {target_financials.get('company_name','Target')}")
+        plt.xticks(rotation=0)
+        plt.tight_layout()
+        return fig
+
+    def plot_multiple_scenarios(self, target_financials, revenue_multiples=None):
+        """Show sensitivity: valuation vs. revenue multiple sweep"""
+        if revenue_multiples is None:
+            revenue_multiples = np.linspace(6, 14, 17)
+        revenue = target_financials['annual_revenue']
+        premium = self.valuation_metrics['strategic_premium']
+
+        valuations = [(m * revenue) * (1 + premium) for m in revenue_multiples]
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.plot(revenue_multiples, valuations, marker='o')
+        ax.set_xlabel('Revenue Multiple')
+        ax.set_ylabel('Strategic Valuation ($)')
+        ax.set_title('Sensitivity: Strategic Valuation vs Revenue Multiple')
+        ax.grid(True)
+        plt.tight_layout()
+        return fig
+
+if __name__ == "__main__":
+    target_financials = {
+        'company_name': 'DataMind AI',
+        'annual_revenue': 8_000_000,
+        'revenue_growth_rate': 0.60,
+        'ebitda_margin': -0.15,
+        'customer_count': 45,
+        'key_technology': 'AI-powered test correlation analytics'
+    }
+    fm = AcquisitionFinancialModel()
+    valuation = fm.calculate_acquisition_valuation(target_financials)
+    print("Recommended Offer:", f"${valuation['recommended_offer']:,.0f}")
+
+    fig1 = fm.plot_valuation_ranges(target_financials, valuation)
+    fig2 = fm.plot_multiple_scenarios(target_financials)
+    plt.show()
+
+
+```
+
+### What the plots show
+
+- Bar chart: direct visual comparison of low/high ranges for revenue-based, EBITDA-based, and strategic valuations.
+
+- Line chart: sensitivity of strategic valuation to different revenue multiples (helps negotiation / board discussion).
+
+---
+
+## Technology Gap Analysis
+
+#### <ins>Goal & Purpose</ins> 
+
+Detect, quantify and prioritize technology capability gaps for the AI Controller (build vs buy analysis). Visualize current capability coverage, gap sizes, and present a heatmap and bar charts showing which areas should be acquisition priorities.
+
+```python
+# TechnologyGapAnalysis with visualizations
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style="whitegrid")
+
+class TechnologyGapAnalysis:
+    def __init__(self):
+        self.ai_controller_requirements = {
+            'core_ml_infrastructure': ['Model training', 'Inference engine', 'Data pipelines'],
+            'domain_specific_algorithms': ['Adaptive test', 'Yield prediction', 'Anomaly detection'],
+            'edge_compute': ['Real-time inference', 'GPU acceleration', 'Low-latency processing'],
+            'data_management': ['Time-series databases', 'Data security', 'Fleet learning'],
+            'ui_ux': ['Dashboard visualization', 'Alert systems', 'Report generation']
+        }
+
+        self.current_capabilities = {
+            'core_ml_infrastructure': 0.4,
+            'domain_specific_algorithms': 0.6,
+            'edge_compute': 0.3,
+            'data_management': 0.5,
+            'ui_ux': 0.7
+        }
+
+    def identify_acquisition_targets(self):
+        gaps = {}
+        acquisition_priorities = []
+        for category, capability_score in self.current_capabilities.items():
+            gap_size = 1.0 - capability_score
+            if gap_size > 0.3:
+                gaps[category] = {
+                    'gap_size': gap_size,
+                    'build_vs_buy_analysis': self._build_vs_buy_analysis(category, gap_size),
+                    'acquisition_priority': 'HIGH' if gap_size > 0.5 else 'MEDIUM'
+                }
+                acquisition_priorities.append(category)
+        return gaps, acquisition_priorities
+
+    def _build_vs_buy_analysis(self, category, gap_size):
+        build_timeline = {
+            'core_ml_infrastructure': 24,
+            'domain_specific_algorithms': 18,
+            'edge_compute': 12,
+            'data_management': 15,
+            'ui_ux': 9
+        }
+        acquisition_timeline = 6
+        time_advantage = build_timeline.get(category, 12) - acquisition_timeline
+        strategic_advantage = "ACQUIRE" if time_advantage > 6 else "BUILD"
+        return {
+            'build_timeline_months': build_timeline.get(category, 12),
+            'acquisition_timeline_months': acquisition_timeline,
+            'time_advantage_months': time_advantage,
+            'recommendation': strategic_advantage
+        }
+
+    # -------------------------
+    # Visualization helpers
+    # -------------------------
+    def plot_capability_bars(self):
+        """Bar chart of current capability coverage (0..1) with gaps"""
+        df = pd.DataFrame.from_dict(self.current_capabilities, orient='index', columns=['coverage'])
+        df = df.sort_values('coverage')
+        fig, ax = plt.subplots(figsize=(8, 4))
+        sns.barplot(x='coverage', y=df.index, data=df.reset_index().rename(columns={'index':'category'}), ax=ax)
+        ax.set_xlabel('Coverage (0..1)')
+        ax.set_title('Current Capability Coverage for AI Controller')
+        plt.tight_layout()
+        return fig
+
+    def plot_gap_heatmap(self):
+        """Heatmap of gap sizes across categories (single-dimension shown as heatmap for presentation)"""
+        categories = list(self.current_capabilities.keys())
+        gap_sizes = [1 - self.current_capabilities[c] for c in categories]
+        df = pd.DataFrame([gap_sizes], columns=categories)
+        fig, ax = plt.subplots(figsize=(10, 2))
+        sns.heatmap(df, annot=True, fmt=".2f", cmap='Reds', cbar=False, ax=ax)
+        ax.set_title('Gap Size Heatmap (1 - coverage)')
+        plt.tight_layout()
+        return fig
+
+if __name__ == "__main__":
+    gap_analysis = TechnologyGapAnalysis()
+    gaps, priorities = gap_analysis.identify_acquisition_targets()
+    print("TOP ACQUISITION PRIORITIES:", priorities)
+    fig1 = gap_analysis.plot_capability_bars()
+    fig2 = gap_analysis.plot_gap_heatmap()
+    plt.show()
+
+```
+
+### What the plots show
+
+- Bar chart: current capability coverage across five areas (quickly shows weak areas).
+
+- Heatmap: gap magnitude (easy for leadership slides).
+
+---
+
+## Partnership Vs Acquisition
+
+#### <ins>Goal & Purpose</ins> 
+
+Offer a structured decision framework to choose between partnerships and acquisitions for a capability and visualize the scoring, aggregate recommendation, and decision matrix via charts to explain the rationale to stakeholders.
+
+```python
+# PartnershipVsAcquisition with visualization
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style="whitegrid")
+
+class PartnershipVsAcquisition:
+    def __init__(self):
+        self.decision_framework = {
+            'strategic_importance': {
+                'question': 'How critical is this capability to our long-term strategy?',
+                'acquisition_threshold': 'Core to competitive advantage',
+                'partnership_threshold': 'Complementary but not essential'
+            },
+            'time_to_market': {
+                'question': 'How quickly do we need this capability?',
+                'acquisition_threshold': 'Immediate need (<12 months)',
+                'partnership_threshold': 'Can wait 18-24 months'
+            },
+            'ip_control': {
+                'question': 'Do we need exclusive control of the IP?',
+                'acquisition_threshold': 'Must own the IP',
+                'partnership_threshold': 'Can license or share IP'
+            },
+            'integration_complexity': {
+                'question': 'How difficult is integration?',
+                'acquisition_threshold': 'Moderate complexity',
+                'partnership_threshold': 'High complexity or cultural mismatch'
+            },
+            'market_position': {
+                'question': 'What is the target company market position?',
+                'acquisition_threshold': 'Emerging leader in niche',
+                'partnership_threshold': 'Established player too expensive to acquire'
+            }
+        }
+
+    def evaluate_strategy(self, capability_assessment):
+        acquisition_score = 0
+        partnership_score = 0
+
+        scoring = {
+            'strategic_importance': {'acquisition': 2, 'partnership': 0},
+            'time_to_market': {'acquisition': 2, 'partnership': 0},
+            'ip_control': {'acquisition': 2, 'partnership': 0},
+            'integration_complexity': {'acquisition': -1, 'partnership': 1},
+            'market_position': {'acquisition': 1, 'partnership': 1}
+        }
+
+        per_factor = []
+        for factor, assessment in capability_assessment.items():
+            if assessment == 'acquisition_aligned':
+                acquisition_score += scoring[factor]['acquisition']
+                partnership_score += scoring[factor]['partnership']
+            elif assessment == 'partnership_aligned':
+                acquisition_score += scoring[factor]['partnership']
+                partnership_score += scoring[factor]['acquisition']
+            per_factor.append({
+                'factor': factor,
+                'assessment': assessment,
+                'acq_points': scoring[factor]['acquisition'] if assessment == 'acquisition_aligned' else scoring[factor]['partnership'],
+                'part_points': scoring[factor]['partnership'] if assessment == 'acquisition_aligned' else scoring[factor]['acquisition']
+            })
+
+        per_df = pd.DataFrame(per_factor)
+        decision = "ACQUISITION" if acquisition_score > partnership_score else "STRATEGIC PARTNERSHIP"
+        return decision, acquisition_score, partnership_score, per_df
+
+    # -------------------------
+    # Visualization helpers
+    # -------------------------
+    def plot_decision_bar(self, acq_score, part_score):
+        fig, ax = plt.subplots(figsize=(6, 3))
+        df = pd.DataFrame({'Score': [acq_score, part_score]}, index=['Acquisition', 'Partnership'])
+        df.plot(kind='bar', legend=False, ax=ax)
+        ax.set_ylabel('Score')
+        ax.set_title('Acquisition vs Partnership Score')
+        plt.xticks(rotation=0)
+        plt.tight_layout()
+        return fig
+
+    def plot_decision_matrix(self, per_df):
+        """Heatmap-like matrix of points per factor"""
+        pivot = per_df.set_index('factor')[['acq_points', 'part_points']]
+        fig, ax = plt.subplots(figsize=(6, max(2, 0.6*len(pivot))))
+        sns.heatmap(pivot, annot=True, fmt=".0f", cmap='coolwarm', ax=ax)
+        ax.set_title('Decision Points by Factor')
+        plt.tight_layout()
+        return fig
+
+if __name__ == "__main__":
+    edge_ai_assessment = {
+        'strategic_importance': 'acquisition_aligned',
+        'time_to_market': 'acquisition_aligned',
+        'ip_control': 'acquisition_aligned',
+        'integration_complexity': 'partnership_aligned',
+        'market_position': 'acquisition_aligned'
+    }
+    advisor = PartnershipVsAcquisition()
+    recommendation, acq_score, part_score, per_df = advisor.evaluate_strategy(edge_ai_assessment)
+    print("Recommendation:", recommendation)
+    fig1 = advisor.plot_decision_bar(acq_score, part_score)
+    fig2 = advisor.plot_decision_matrix(per_df)
+    plt.show()
+
+```
+
+### What the plots show
+
+- Bar chart: straightforward comparison of total scores (acquisition vs partnership).
+
+- Heatmap/matrix: factor-by-factor points to show where each approach gains/loses.
+
+---
+
+## Integration Plan (100-Day Template) — Visualized Timeline
+
+#### <ins>Goal & Purpose</ins> 
+
+Convert the 100-day integration plan into a simple Gantt-like horizontal bar chart so stakeholders can visually understand sequencing and priorities for Day 0–100.
+
+```python
+# Integration plan visualization
+import matplotlib.pyplot as plt
+import pandas as pd
+
+integration_plan = {
+    'day_0_30': [
+        'Form joint integration team',
+        'Align on combined product roadmap',
+        'Begin technology integration',
+        'Communicate with customers'
+    ],
+    'day_31_60': [
+        'Integrate key algorithms into AI Controller',
+        'Cross-train engineering teams',
+        'Develop joint go-to-market materials',
+        'Identify quick-win customer deployments'
+    ],
+    'day_61_100': [
+        'Launch first integrated product release',
+        'Achieve first joint customer success',
+        'Measure integration KPIs',
+        'Refine long-term integration plan'
+    ]
+}
+
+def plot_integration_gantt(plan):
+    rows = []
+    for k, tasks in plan.items():
+        start, end = k.split('_')
+        # parse days
+    # For clarity map to numeric timeline
+    mapping = {'day_0_30': (0, 30), 'day_31_60': (31, 60), 'day_61_100': (61, 100)}
+    fig, ax = plt.subplots(figsize=(10, 3))
+    y = 0
+    for key, tasks in plan.items():
+        start, end = mapping[key]
+        ax.broken_barh([(start, end-start+1)], (y, 0.8), facecolors='tab:blue', alpha=0.6)
+        ax.text(start + 1, y + 0.3, key.replace('day_', '').replace('_', ' to '), va='center', color='white', fontsize=10)
+        y += 1
+    ax.set_xlabel('Days')
+    ax.set_yticks([])
+    ax.set_xlim(0, 105)
+    ax.set_title('100-Day Integration Plan Overview (Gantt-like)')
+    plt.tight_layout()
+    return fig
+
+if __name__ == "__main__":
+    fig = plot_integration_gantt(integration_plan)
+    plt.show()
+
+```
+
+## What the plot shows
+
+- Horizontal bars representing the three time blocks. Use in slide decks to show sequencing.
 
 
 
