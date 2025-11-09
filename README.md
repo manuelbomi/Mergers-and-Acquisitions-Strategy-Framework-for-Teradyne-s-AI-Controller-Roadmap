@@ -16,8 +16,48 @@
 
 - Complementary software platforms
 
-<ins>Recent Example: Teradyne's Acquisition of LTE</ins>
-In recent years, Teradyne acquired LitePoint, MiR and Quantifi Photonics. These are strategic acquisitions that immediately gave Teradyne good leverages in the domain of expertise of these acquisitions. 
+
+#### In recent years, Teradyne acquired LitePoint, MiR and Quantifi Photonics. These are strategic acquisitions that immediately gave Teradyne good leverages in the domain of expertise of these acquisitions. 
+
+#### The M&A modules provided in this repository aim to supports Teradyne’s AI Controller strategy by providing:
+
+- A scoring framework to evaluate potential targets on technology, commercial, and strategic fit (MAAcquisitionStrategy).
+
+- A financial valuation model to estimate acquisition ranges and simulate sensitivity to multiples (AcquisitionFinancialModel).
+
+- A technology gap analysis to identify where acquisitions create the greatest time-to-market advantage (TechnologyGapAnalysis).
+
+- A decision framework to choose between acquisition and strategic partnership (PartnershipVsAcquisition).
+
+- A 100-day integration plan template visualized as a simple timeline to align stakeholders post-deal.
+
+---
+
+## Key Outputs / Use Cases
+
+- Target shortlisting: Use the scoring framework and per-criterion visuals to rank candidates.
+
+- Valuation & negotiation: Use valuation ranges and sensitivity plots to prepare bid ranges and justify strategic premiums.
+
+- Strategy alignment: Use gap heatmaps and radar views to justify build vs buy decisions to execs.
+
+- Deal execution: Use the Gantt timeline for integration planning and milestone tracking.
+
+---
+
+## How to use the code
+
+- Fill strategic_fit profiles for target companies (0–1 normalized inputs per criterion).
+
+- Run MAAcquisitionStrategy.evaluate_acquisition_target() to get per-criterion breakdown and recommendation.
+
+- Use AcquisitionFinancialModel.calculate_acquisition_valuation() for monetary ranges and scenario plots.
+
+- Run TechnologyGapAnalysis to prioritize acquisition targets for capability gaps.
+
+- Use PartnershipVsAcquisition.evaluate_strategy() for a binary recommendation with point-level detail.
+- 
+- Export the generated matplotlib figures for slides or reports (PNG/PDF) using fig.savefig(...) if needed.
 
 
 
