@@ -19,7 +19,7 @@
 ---
 
 
-#### In recent years, Teradyne acquired LitePoint, MiR and Quantifi Photonics. These are strategic acquisitions that immediately gave Teradyne good leverages in the domain of expertise of these acquisitions. 
+#### In recent years, Teradyne acquired LitePoint, MiR and Quantifi Photonics. These are strategic acquisitions that immediately gave Teradyne good leverages in the domain of expertise of these companies. 
 
 #### The M&A modules provided in this repository aim to supports Teradyne’s AI Controller strategy by providing:
 
