@@ -281,6 +281,8 @@ if __name__ == "__main__":
 
 ```
 
+
+
 ### What the plots show
 
 - Pie: quick visual of candidate category focus.
@@ -289,7 +291,13 @@ if __name__ == "__main__":
 
 - Radar: average raw (0–1) score grouped by category (technology/business/strategic).
 
+---
 
+<img width="700" height="500" alt="Image" src="https://github.com/user-attachments/assets/da3f6d22-25e1-4c1d-aeee-297f1d661034" />
+
+<img width="1000" height="500" alt="Image" src="https://github.com/user-attachments/assets/664afcc9-6653-499f-99e1-7210c028f54f" />
+
+<img width="600" height="600" alt="Image" src="https://github.com/user-attachments/assets/687d2158-4c51-4ce6-b114-71d155f2ed8e" />
 
 
 
