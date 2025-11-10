@@ -552,111 +552,233 @@ if __name__ == "__main__":
 Offer a structured decision framework to choose between partnerships and acquisitions for a capability and visualize the scoring, aggregate recommendation, and decision matrix via charts to explain the rationale to stakeholders.
 
 ```python
-# PartnershipVsAcquisition with visualization
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Apply consistent visual style
 sns.set(style="whitegrid")
 
-class PartnershipVsAcquisition:
+class MAAcquisitionStrategy:
+    """
+    M&A Acquisition Strategy Model
+    Evaluates potential AI acquisition targets using quantitative and visual methods.
+    """
+
     def __init__(self):
-        self.decision_framework = {
-            'strategic_importance': {
-                'question': 'How critical is this capability to our long-term strategy?',
-                'acquisition_threshold': 'Core to competitive advantage',
-                'partnership_threshold': 'Complementary but not essential'
+        """Initialize acquisition target categories and evaluation criteria."""
+        self.target_categories = {
+            'AI_Software_Platforms': {
+                'focus': 'Companies with proven ML platforms for manufacturing',
+                'examples': ['Data analytics startups', 'MLOps platforms', 'Predictive maintenance SaaS'],
+                'strategic_rationale': 'Accelerate software development by 2-3 years',
+                'valuation_range': '$50-200M',
+                'integration_timeline': '6-12 months'
             },
-            'time_to_market': {
-                'question': 'How quickly do we need this capability?',
-                'acquisition_threshold': 'Immediate need (<12 months)',
-                'partnership_threshold': 'Can wait 18-24 months'
+            'Specialized_AI_Algorithms': {
+                'focus': 'Boutique AI firms with semiconductor-specific algorithms',
+                'examples': ['Yield optimization startups', 'Test pattern generation AI', 'Anomaly detection specialists'],
+                'strategic_rationale': 'Acquire proprietary algorithms and domain expertise',
+                'valuation_range': '$20-80M',
+                'integration_timeline': '3-9 months'
             },
-            'ip_control': {
-                'question': 'Do we need exclusive control of the IP?',
-                'acquisition_threshold': 'Must own the IP',
-                'partnership_threshold': 'Can license or share IP'
+            'Complementary_Hardware': {
+                'focus': 'Companies with AI-accelerated test hardware',
+                'examples': ['FPGA test companies', 'GPU-accelerated measurement firms'],
+                'strategic_rationale': 'Enhance real-time inference capabilities',
+                'valuation_range': '$100-300M',
+                'integration_timeline': '12-18 months'
             },
-            'integration_complexity': {
-                'question': 'How difficult is integration?',
-                'acquisition_threshold': 'Moderate complexity',
-                'partnership_threshold': 'High complexity or cultural mismatch'
-            },
-            'market_position': {
-                'question': 'What is the target company market position?',
-                'acquisition_threshold': 'Emerging leader in niche',
-                'partnership_threshold': 'Established player too expensive to acquire'
+            'Data_Infrastructure': {
+                'focus': 'Companies specializing in industrial data management',
+                'examples': ['Time-series database companies', 'Edge computing platforms'],
+                'strategic_rationale': 'Build foundation for fleet learning network',
+                'valuation_range': '$30-120M',
+                'integration_timeline': '6-12 months'
             }
         }
 
-    def evaluate_strategy(self, capability_assessment):
-        acquisition_score = 0
-        partnership_score = 0
-
-        scoring = {
-            'strategic_importance': {'acquisition': 2, 'partnership': 0},
-            'time_to_market': {'acquisition': 2, 'partnership': 0},
-            'ip_control': {'acquisition': 2, 'partnership': 0},
-            'integration_complexity': {'acquisition': -1, 'partnership': 1},
-            'market_position': {'acquisition': 1, 'partnership': 1}
+        # Define weighted evaluation categories
+        self.evaluation_criteria = {
+            'technology_assessment': {
+                'ip_portfolio': 0.15,
+                'algorithm_sophistication': 0.20,
+                'product_maturity': 0.15,
+                'scalability': 0.10
+            },
+            'business_assessment': {
+                'customer_base': 0.10,
+                'revenue_traction': 0.08,
+                'growth_trajectory': 0.07,
+                'profitability': 0.05
+            },
+            'strategic_assessment': {
+                'team_expertise': 0.05,
+                'culture_fit': 0.03,
+                'integration_complexity': 0.02
+            }
         }
 
-        per_factor = []
-        for factor, assessment in capability_assessment.items():
-            if assessment == 'acquisition_aligned':
-                acquisition_score += scoring[factor]['acquisition']
-                partnership_score += scoring[factor]['partnership']
-            elif assessment == 'partnership_aligned':
-                acquisition_score += scoring[factor]['partnership']
-                partnership_score += scoring[factor]['acquisition']
-            per_factor.append({
-                'factor': factor,
-                'assessment': assessment,
-                'acq_points': scoring[factor]['acquisition'] if assessment == 'acquisition_aligned' else scoring[factor]['partnership'],
-                'part_points': scoring[factor]['partnership'] if assessment == 'acquisition_aligned' else scoring[factor]['acquisition']
-            })
+    # -------------------------------------------------
+    # Evaluation and scoring
+    # -------------------------------------------------
+    def evaluate_acquisition_target(self, target_company, strategic_fit):
+        """
+        Compute total score and breakdown for a given target company.
+        :param target_company: str - name of company
+        :param strategic_fit: dict - scores between 0 and 1 per criterion
+        """
+        total_score = 0
+        per_criterion = []
+        max_score = 0
 
-        per_df = pd.DataFrame(per_factor)
-        decision = "ACQUISITION" if acquisition_score > partnership_score else "STRATEGIC PARTNERSHIP"
-        return decision, acquisition_score, partnership_score, per_df
+        for category, criteria in self.evaluation_criteria.items():
+            for criterion, weight in criteria.items():
+                raw = strategic_fit.get(criterion, 0)
+                score = raw * weight * 100
+                per_criterion.append({
+                    'criterion': criterion,
+                    'category': category,
+                    'weight': weight,
+                    'raw_score': raw,
+                    'weighted_score': score
+                })
+                total_score += score
+                max_score += 100 * weight
 
-    # -------------------------
+        df = pd.DataFrame(per_criterion).sort_values('weighted_score', ascending=False)
+
+        return {
+            'company': target_company,
+            'total_score': total_score,
+            'max_score': max_score,
+            'per_criterion_df': df,
+            'acquisition_recommendation': self._get_recommendation(total_score),
+            'priority_level': self._get_priority(total_score)
+        }
+
+    # -------------------------------------------------
+    # Private helpers for recommendation and priority
+    # -------------------------------------------------
+    def _get_recommendation(self, score):
+        """Translate numeric score into qualitative recommendation."""
+        if score >= 80:
+            return "STRONG ACQUIRE - High strategic fit"
+        elif score >= 65:
+            return "CONSIDER ACQUISITION - Good fit with some risks"
+        elif score >= 50:
+            return "EVALUATE FURTHER - Marginal strategic value"
+        else:
+            return "PASS - Low strategic alignment"
+
+    def _get_priority(self, score):
+        """Assign an internal acquisition priority label."""
+        if score >= 80:
+            return "IMMEDIATE"
+        elif score >= 65:
+            return "HIGH"
+        elif score >= 50:
+            return "MEDIUM"
+        else:
+            return "LOW"
+
+    # -------------------------------------------------
     # Visualization helpers
-    # -------------------------
-    def plot_decision_bar(self, acq_score, part_score):
-        fig, ax = plt.subplots(figsize=(6, 3))
-        df = pd.DataFrame({'Score': [acq_score, part_score]}, index=['Acquisition', 'Partnership'])
-        df.plot(kind='bar', legend=False, ax=ax)
-        ax.set_ylabel('Score')
-        ax.set_title('Acquisition vs Partnership Score')
-        plt.xticks(rotation=0)
+    # -------------------------------------------------
+    def plot_target_category_pie(self):
+        """Pie chart showing distribution of acquisition target categories."""
+        keys = list(self.target_categories.keys())
+        sizes = np.ones(len(keys))
+        fig, ax = plt.subplots(figsize=(7, 5))
+        ax.pie(sizes, labels=keys, autopct='%1.0f%%', startangle=140)
+        ax.set_title('M&A Target Category Distribution (Example)')
         plt.tight_layout()
         return fig
 
-    def plot_decision_matrix(self, per_df):
-        """Heatmap-like matrix of points per factor"""
-        pivot = per_df.set_index('factor')[['acq_points', 'part_points']]
-        fig, ax = plt.subplots(figsize=(6, max(2, 0.6*len(pivot))))
-        sns.heatmap(pivot, annot=True, fmt=".0f", cmap='coolwarm', ax=ax)
-        ax.set_title('Decision Points by Factor')
+    def plot_criterion_bar(self, per_criterion_df):
+        """Bar chart for weighted scores per evaluation criterion."""
+        df = per_criterion_df.copy()
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.barplot(x='weighted_score', y='criterion', hue='category', data=df, dodge=False, ax=ax)
+        ax.set_xlabel('Weighted Score (0–100)')
+        ax.set_ylabel('')
+        ax.set_title('Per-Criterion Weighted Scores for Target')
+        ax.legend(title='Category', bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
         return fig
 
+    def plot_score_radar(self, per_criterion_df):
+        """Radar chart summarizing average raw scores per category."""
+        df = per_criterion_df.copy()
+        agg = df.groupby('category')['raw_score'].mean()
+        labels = agg.index.tolist()
+        values = agg.values.tolist()
+        values += values[:1]  # close loop
+        angles = np.linspace(0, 2 * np.pi, len(labels) + 1)
+
+        fig = plt.figure(figsize=(6, 6))
+        ax = fig.add_subplot(111, polar=True)
+        ax.plot(angles, values, 'o-', linewidth=2)
+        ax.fill(angles, values, alpha=0.25)
+        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels)
+        ax.set_title('Average Raw Score by Category (Radar View)')
+        ax.set_ylim(0, 1)
+
+        # Annotate each value
+        for i, val in enumerate(values[:-1]):
+            ax.text(angles[i], val + 0.05, f"{val:.2f}", ha='center', va='center', fontsize=9)
+
+        plt.tight_layout()
+        return fig
+
+
+# -------------------------------------------------
+# Example usage: TestAI Labs scenario
+# -------------------------------------------------
 if __name__ == "__main__":
-    edge_ai_assessment = {
-        'strategic_importance': 'acquisition_aligned',
-        'time_to_market': 'acquisition_aligned',
-        'ip_control': 'acquisition_aligned',
-        'integration_complexity': 'partnership_aligned',
-        'market_position': 'acquisition_aligned'
+    strategy = MAAcquisitionStrategy()
+
+    # Example acquisition target profile (scores 0–1)
+    testai_labs_profile = {
+        'ip_portfolio': 0.9,
+        'algorithm_sophistication': 0.8,
+        'product_maturity': 0.6,
+        'scalability': 0.7,
+        'customer_base': 0.4,
+        'revenue_traction': 0.3,
+        'growth_trajectory': 0.8,
+        'profitability': 0.2,
+        'team_expertise': 0.9,
+        'culture_fit': 0.7,
+        'integration_complexity': 0.6
     }
-    advisor = PartnershipVsAcquisition()
-    recommendation, acq_score, part_score, per_df = advisor.evaluate_strategy(edge_ai_assessment)
-    print("Recommendation:", recommendation)
-    fig1 = advisor.plot_decision_bar(acq_score, part_score)
-    fig2 = advisor.plot_decision_matrix(per_df)
+
+    evaluation = strategy.evaluate_acquisition_target("TestAI Labs", testai_labs_profile)
+
+    print("\n--- AI M&A Evaluation Report ---")
+    print(f"Company: {evaluation['company']}")
+    print(f"Total Score: {evaluation['total_score']:.1f}/100")
+    print(f"Recommendation: {evaluation['acquisition_recommendation']}")
+    print(f"Priority Level: {evaluation['priority_level']}\n")
+
+    # Generate visualizations
+    fig1 = strategy.plot_target_category_pie()
+    fig2 = strategy.plot_criterion_bar(evaluation['per_criterion_df'])
+    fig3 = strategy.plot_score_radar(evaluation['per_criterion_df'])
+
     plt.show()
+
+    # Example output list of strategic focus areas
+    top_acquisition_priorities = [
+        'core_ml_infrastructure',
+        'domain_specific_algorithms',
+        'edge_compute',
+        'data_management',
+        'ui_ux'
+    ]
+    print("Top Acquisition Priorities:", top_acquisition_priorities)
+
 
 ```
 
@@ -675,55 +797,232 @@ if __name__ == "__main__":
 Convert the 100-day integration plan into a simple Gantt-like horizontal bar chart so stakeholders can visually understand sequencing and priorities for Day 0–100.
 
 ```python
-# Integration plan visualization
-import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-integration_plan = {
-    'day_0_30': [
-        'Form joint integration team',
-        'Align on combined product roadmap',
-        'Begin technology integration',
-        'Communicate with customers'
-    ],
-    'day_31_60': [
-        'Integrate key algorithms into AI Controller',
-        'Cross-train engineering teams',
-        'Develop joint go-to-market materials',
-        'Identify quick-win customer deployments'
-    ],
-    'day_61_100': [
-        'Launch first integrated product release',
-        'Achieve first joint customer success',
-        'Measure integration KPIs',
-        'Refine long-term integration plan'
-    ]
-}
+# Apply consistent visual style
+sns.set(style="whitegrid")
 
-def plot_integration_gantt(plan):
-    rows = []
-    for k, tasks in plan.items():
-        start, end = k.split('_')
-        # parse days
-    # For clarity map to numeric timeline
-    mapping = {'day_0_30': (0, 30), 'day_31_60': (31, 60), 'day_61_100': (61, 100)}
-    fig, ax = plt.subplots(figsize=(10, 3))
-    y = 0
-    for key, tasks in plan.items():
-        start, end = mapping[key]
-        ax.broken_barh([(start, end-start+1)], (y, 0.8), facecolors='tab:blue', alpha=0.6)
-        ax.text(start + 1, y + 0.3, key.replace('day_', '').replace('_', ' to '), va='center', color='white', fontsize=10)
-        y += 1
-    ax.set_xlabel('Days')
-    ax.set_yticks([])
-    ax.set_xlim(0, 105)
-    ax.set_title('100-Day Integration Plan Overview (Gantt-like)')
-    plt.tight_layout()
-    return fig
+class MAAcquisitionStrategy:
+    """
+    M&A Acquisition Strategy Model
+    Evaluates potential AI acquisition targets using quantitative and visual methods.
+    """
 
+    def __init__(self):
+        """Initialize acquisition target categories and evaluation criteria."""
+        self.target_categories = {
+            'AI_Software_Platforms': {
+                'focus': 'Companies with proven ML platforms for manufacturing',
+                'examples': ['Data analytics startups', 'MLOps platforms', 'Predictive maintenance SaaS'],
+                'strategic_rationale': 'Accelerate software development by 2-3 years',
+                'valuation_range': '$50-200M',
+                'integration_timeline': '6-12 months'
+            },
+            'Specialized_AI_Algorithms': {
+                'focus': 'Boutique AI firms with semiconductor-specific algorithms',
+                'examples': ['Yield optimization startups', 'Test pattern generation AI', 'Anomaly detection specialists'],
+                'strategic_rationale': 'Acquire proprietary algorithms and domain expertise',
+                'valuation_range': '$20-80M',
+                'integration_timeline': '3-9 months'
+            },
+            'Complementary_Hardware': {
+                'focus': 'Companies with AI-accelerated test hardware',
+                'examples': ['FPGA test companies', 'GPU-accelerated measurement firms'],
+                'strategic_rationale': 'Enhance real-time inference capabilities',
+                'valuation_range': '$100-300M',
+                'integration_timeline': '12-18 months'
+            },
+            'Data_Infrastructure': {
+                'focus': 'Companies specializing in industrial data management',
+                'examples': ['Time-series database companies', 'Edge computing platforms'],
+                'strategic_rationale': 'Build foundation for fleet learning network',
+                'valuation_range': '$30-120M',
+                'integration_timeline': '6-12 months'
+            }
+        }
+
+        # Define weighted evaluation categories
+        self.evaluation_criteria = {
+            'technology_assessment': {
+                'ip_portfolio': 0.15,
+                'algorithm_sophistication': 0.20,
+                'product_maturity': 0.15,
+                'scalability': 0.10
+            },
+            'business_assessment': {
+                'customer_base': 0.10,
+                'revenue_traction': 0.08,
+                'growth_trajectory': 0.07,
+                'profitability': 0.05
+            },
+            'strategic_assessment': {
+                'team_expertise': 0.05,
+                'culture_fit': 0.03,
+                'integration_complexity': 0.02
+            }
+        }
+
+    # -------------------------------------------------
+    # Evaluation and scoring
+    # -------------------------------------------------
+    def evaluate_acquisition_target(self, target_company, strategic_fit):
+        """
+        Compute total score and breakdown for a given target company.
+        :param target_company: str - name of company
+        :param strategic_fit: dict - scores between 0 and 1 per criterion
+        """
+        total_score = 0
+        per_criterion = []
+        max_score = 0
+
+        for category, criteria in self.evaluation_criteria.items():
+            for criterion, weight in criteria.items():
+                raw = strategic_fit.get(criterion, 0)
+                score = raw * weight * 100
+                per_criterion.append({
+                    'criterion': criterion,
+                    'category': category,
+                    'weight': weight,
+                    'raw_score': raw,
+                    'weighted_score': score
+                })
+                total_score += score
+                max_score += 100 * weight
+
+        df = pd.DataFrame(per_criterion).sort_values('weighted_score', ascending=False)
+
+        return {
+            'company': target_company,
+            'total_score': total_score,
+            'max_score': max_score,
+            'per_criterion_df': df,
+            'acquisition_recommendation': self._get_recommendation(total_score),
+            'priority_level': self._get_priority(total_score)
+        }
+
+    # -------------------------------------------------
+    # Private helpers for recommendation and priority
+    # -------------------------------------------------
+    def _get_recommendation(self, score):
+        """Translate numeric score into qualitative recommendation."""
+        if score >= 80:
+            return "STRONG ACQUIRE - High strategic fit"
+        elif score >= 65:
+            return "CONSIDER ACQUISITION - Good fit with some risks"
+        elif score >= 50:
+            return "EVALUATE FURTHER - Marginal strategic value"
+        else:
+            return "PASS - Low strategic alignment"
+
+    def _get_priority(self, score):
+        """Assign an internal acquisition priority label."""
+        if score >= 80:
+            return "IMMEDIATE"
+        elif score >= 65:
+            return "HIGH"
+        elif score >= 50:
+            return "MEDIUM"
+        else:
+            return "LOW"
+
+    # -------------------------------------------------
+    # Visualization helpers
+    # -------------------------------------------------
+    def plot_target_category_pie(self):
+        """Pie chart showing distribution of acquisition target categories."""
+        keys = list(self.target_categories.keys())
+        sizes = np.ones(len(keys))
+        fig, ax = plt.subplots(figsize=(7, 5))
+        ax.pie(sizes, labels=keys, autopct='%1.0f%%', startangle=140)
+        ax.set_title('M&A Target Category Distribution (Example)')
+        plt.tight_layout()
+        return fig
+
+    def plot_criterion_bar(self, per_criterion_df):
+        """Bar chart for weighted scores per evaluation criterion."""
+        df = per_criterion_df.copy()
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.barplot(x='weighted_score', y='criterion', hue='category', data=df, dodge=False, ax=ax)
+        ax.set_xlabel('Weighted Score (0–100)')
+        ax.set_ylabel('')
+        ax.set_title('Per-Criterion Weighted Scores for Target')
+        ax.legend(title='Category', bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        return fig
+
+    def plot_score_radar(self, per_criterion_df):
+        """Radar chart summarizing average raw scores per category."""
+        df = per_criterion_df.copy()
+        agg = df.groupby('category')['raw_score'].mean()
+        labels = agg.index.tolist()
+        values = agg.values.tolist()
+        values += values[:1]  # close loop
+        angles = np.linspace(0, 2 * np.pi, len(labels) + 1)
+
+        fig = plt.figure(figsize=(6, 6))
+        ax = fig.add_subplot(111, polar=True)
+        ax.plot(angles, values, 'o-', linewidth=2)
+        ax.fill(angles, values, alpha=0.25)
+        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels)
+        ax.set_title('Average Raw Score by Category (Radar View)')
+        ax.set_ylim(0, 1)
+
+        # Annotate each value
+        for i, val in enumerate(values[:-1]):
+            ax.text(angles[i], val + 0.05, f"{val:.2f}", ha='center', va='center', fontsize=9)
+
+        plt.tight_layout()
+        return fig
+
+
+# -------------------------------------------------
+# Example usage: TestAI Labs scenario
+# -------------------------------------------------
 if __name__ == "__main__":
-    fig = plot_integration_gantt(integration_plan)
+    strategy = MAAcquisitionStrategy()
+
+    # Example acquisition target profile (scores 0–1)
+    testai_labs_profile = {
+        'ip_portfolio': 0.9,
+        'algorithm_sophistication': 0.8,
+        'product_maturity': 0.6,
+        'scalability': 0.7,
+        'customer_base': 0.4,
+        'revenue_traction': 0.3,
+        'growth_trajectory': 0.8,
+        'profitability': 0.2,
+        'team_expertise': 0.9,
+        'culture_fit': 0.7,
+        'integration_complexity': 0.6
+    }
+
+    evaluation = strategy.evaluate_acquisition_target("TestAI Labs", testai_labs_profile)
+
+    print("\n--- AI M&A Evaluation Report ---")
+    print(f"Company: {evaluation['company']}")
+    print(f"Total Score: {evaluation['total_score']:.1f}/100")
+    print(f"Recommendation: {evaluation['acquisition_recommendation']}")
+    print(f"Priority Level: {evaluation['priority_level']}\n")
+
+    # Generate visualizations
+    fig1 = strategy.plot_target_category_pie()
+    fig2 = strategy.plot_criterion_bar(evaluation['per_criterion_df'])
+    fig3 = strategy.plot_score_radar(evaluation['per_criterion_df'])
+
     plt.show()
+
+    # Example output list of strategic focus areas
+    top_acquisition_priorities = [
+        'core_ml_infrastructure',
+        'domain_specific_algorithms',
+        'edge_compute',
+        'data_management',
+        'ui_ux'
+    ]
+    print("Top Acquisition Priorities:", top_acquisition_priorities)
 
 ```
 
