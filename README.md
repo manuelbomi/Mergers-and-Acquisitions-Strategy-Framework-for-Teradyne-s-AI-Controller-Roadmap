@@ -535,6 +535,13 @@ if __name__ == "__main__":
 - Bar chart: current capability coverage across five areas (quickly shows weak areas).
 
 - Heatmap: gap magnitude (easy for leadership slides).
+  
+---
+
+<img width="1000" height="200" alt="Image" src="https://github.com/user-attachments/assets/d0977cee-7bcb-465e-83be-1a4efbf18980" />
+
+
+<img width="800" height="400" alt="Image" src="https://github.com/user-attachments/assets/e1b5a9b6-6db0-452c-b8a0-b12a088103fa" />
 
 ---
 
