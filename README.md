@@ -1000,6 +1000,13 @@ if __name__ == "__main__":
 ## What the plot shows
 
 - Horizontal bars representing the three time blocks. Use in slide decks to show sequencing.
+---
+
+<img width="1000" height="300" alt="Image" src="https://github.com/user-attachments/assets/4a13449c-122e-4ed8-a7f0-5e13ca0753f1" />
+
+<img width="600" height="300" alt="Image" src="https://github.com/user-attachments/assets/0c27548b-6a93-4a97-803a-e519c0d58c4b" />
+
+<img width="600" height="300" alt="Image" src="https://github.com/user-attachments/assets/ec3b77fd-0c26-4f5f-95cf-29afee35158f" />
 
 
 
