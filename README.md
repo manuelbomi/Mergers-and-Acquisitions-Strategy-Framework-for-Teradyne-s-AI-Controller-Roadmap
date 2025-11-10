@@ -77,10 +77,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Use a clean visual style
 sns.set(style="whitegrid")
 
 class MAAcquisitionStrategy:
     def __init__(self):
+        """Initialize acquisition target categories and evaluation criteria."""
         self.target_categories = {
             'AI_Software_Platforms': {
                 'focus': 'Companies with proven ML platforms for manufacturing',
@@ -132,14 +134,18 @@ class MAAcquisitionStrategy:
             }
         }
 
+    # -------------------------------------------------
+    # Evaluation and scoring
+    # -------------------------------------------------
     def evaluate_acquisition_target(self, target_company, strategic_fit):
-        """Return scored breakdown and recommendation"""
+        """Compute total score and detailed breakdown for a given company."""
         total_score = 0
         per_criterion = []
         max_score = 0
+
         for category, criteria in self.evaluation_criteria.items():
             for criterion, weight in criteria.items():
-                raw = strategic_fit.get(criterion, 0)  # expected 0..1
+                raw = strategic_fit.get(criterion, 0)  # expected in range 0..1
                 score = raw * weight * 100
                 per_criterion.append({
                     'criterion': criterion,
@@ -162,6 +168,7 @@ class MAAcquisitionStrategy:
         }
 
     def _get_recommendation(self, score):
+        """Translate score into qualitative recommendation."""
         if score >= 80:
             return "STRONG ACQUIRE - High strategic fit"
         elif score >= 65:
@@ -172,6 +179,7 @@ class MAAcquisitionStrategy:
             return "PASS - Low strategic alignment"
 
     def _get_priority(self, score):
+        """Assign internal priority label."""
         if score >= 80:
             return "IMMEDIATE"
         elif score >= 65:
@@ -181,40 +189,40 @@ class MAAcquisitionStrategy:
         else:
             return "LOW"
 
-    # -------------------------
+    # -------------------------------------------------
     # Visualization helpers
-    # -------------------------
+    # -------------------------------------------------
     def plot_target_category_pie(self):
-        """Show a pie of target categories and integration timelines (counts)"""
+        """Pie chart showing distribution of acquisition categories."""
         keys = list(self.target_categories.keys())
-        # For the pie we just demonstrate equal weighting of categories by count
         sizes = np.ones(len(keys))
         fig, ax = plt.subplots(figsize=(7, 5))
         ax.pie(sizes, labels=keys, autopct='%1.0f%%', startangle=140)
-        ax.set_title('M&A Target Category Distribution (example view)')
+        ax.set_title('M&A Target Category Distribution (Example View)')
         plt.tight_layout()
         return fig
 
     def plot_criterion_bar(self, per_criterion_df):
-        """Bar plot of weighted score per criterion"""
+        """Horizontal bar chart for weighted scores per evaluation criterion."""
         df = per_criterion_df.copy()
         fig, ax = plt.subplots(figsize=(10, 5))
         sns.barplot(x='weighted_score', y='criterion', data=df, hue='category', dodge=False, ax=ax)
-        ax.set_xlabel('Weighted Score (0-100)')
+        ax.set_xlabel('Weighted Score (0–100)')
         ax.set_ylabel('')
-        ax.set_title(f'Per-criterion Weighted Scores for Target')
+        ax.set_title('Per-Criterion Weighted Scores for Target')
         ax.legend(title='Category', bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
         return fig
 
     def plot_score_radar(self, per_criterion_df):
-        """Radar-like polygon that groups criteria by category (averaged)"""
+        """Radar chart showing average raw scores by category."""
         df = per_criterion_df.copy()
-        # aggregate by category
         agg = df.groupby('category')['raw_score'].mean()
+
         labels = agg.index.tolist()
         values = agg.values.tolist()
-        # complete the loop
+
+        # Close the radar loop
         values += values[:1]
         angles = np.linspace(0, 2 * np.pi, len(labels) + 1, endpoint=True)
 
@@ -222,17 +230,25 @@ class MAAcquisitionStrategy:
         ax = fig.add_subplot(111, polar=True)
         ax.plot(angles, values, 'o-', linewidth=2)
         ax.fill(angles, values, alpha=0.25)
-        ax.set_thetagrids(angles * 180/np.pi, labels)
-        ax.set_title('Average Raw Score by Category (radar view)')
+        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels)  # ✅ Fixed line
+        ax.set_title('Average Raw Score by Category (Radar View)')
         ax.set_ylim(0, 1)
+
+        # Optional: annotate values
+        for i, val in enumerate(values[:-1]):
+            ax.text(angles[i], val + 0.05, f"{val:.2f}", ha='center', va='center', fontsize=9)
+
         plt.tight_layout()
         return fig
 
-# -------------------------
-# Example usage (your TestAI Labs)
-# -------------------------
+
+# -------------------------------------------------
+# Example Usage – TestAI Labs Scenario
+# -------------------------------------------------
 if __name__ == "__main__":
     strategy = MAAcquisitionStrategy()
+
+    # Example acquisition target profile (normalized scores between 0–1)
     testai_labs_profile = {
         'ip_portfolio': 0.9,
         'algorithm_sophistication': 0.8,
@@ -246,16 +262,21 @@ if __name__ == "__main__":
         'culture_fit': 0.7,
         'integration_complexity': 0.6
     }
-    evaluation = strategy.evaluate_acquisition_target("TestAI Labs", testai_labs_profile)
-    print(f"Overall Score: {evaluation['total_score']:.1f}/100")
-    print(f"Recommendation: {evaluation['acquisition_recommendation']}")
-    print(f"Priority: {evaluation['priority_level']}")
 
-    # Plots
+    # Compute and display evaluation
+    evaluation = strategy.evaluate_acquisition_target("TestAI Labs", testai_labs_profile)
+    print(f"\n--- AI M&A Evaluation Report: {evaluation['company']} ---")
+    print(f"Total Score: {evaluation['total_score']:.1f}/100")
+    print(f"Recommendation: {evaluation['acquisition_recommendation']}")
+    print(f"Priority: {evaluation['priority_level']}\n")
+
+    # Generate visualizations
     fig1 = strategy.plot_target_category_pie()
     fig2 = strategy.plot_criterion_bar(evaluation['per_criterion_df'])
     fig3 = strategy.plot_score_radar(evaluation['per_criterion_df'])
+
     plt.show()
+
 
 
 ```
@@ -267,6 +288,10 @@ if __name__ == "__main__":
 - Bar plot: per-criterion weighted score showing strengths and weaknesses.
 
 - Radar: average raw (0–1) score grouped by category (technology/business/strategic).
+
+
+
+
 
 ---
 
