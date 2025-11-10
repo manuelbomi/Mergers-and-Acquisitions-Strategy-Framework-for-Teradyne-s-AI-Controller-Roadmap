@@ -282,7 +282,6 @@ if __name__ == "__main__":
 ```
 
 
-
 ### What the plots show
 
 - Pie: quick visual of candidate category focus.
@@ -421,6 +420,13 @@ if __name__ == "__main__":
 - Bar chart: direct visual comparison of low/high ranges for revenue-based, EBITDA-based, and strategic valuations.
 
 - Line chart: sensitivity of strategic valuation to different revenue multiples (helps negotiation / board discussion).
+
+---
+
+<img width="800" height="500" alt="Image" src="https://github.com/user-attachments/assets/9a62457d-9a56-4a12-a3aa-a3d003af2bdf" />
+
+
+<img width="800" height="400" alt="Image" src="https://github.com/user-attachments/assets/a741ffa8-8350-4b4d-8cde-188e3c06f376" />
 
 ---
 
