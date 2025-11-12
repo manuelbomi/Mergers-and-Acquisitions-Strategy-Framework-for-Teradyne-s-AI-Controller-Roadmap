@@ -15,6 +15,10 @@
 - Specialized talent in machine learning for manufacturing
 
 - Complementary software platforms
+
+
+
+#### The M & A strategy that we shall fully discuss in this repository is part of the AI Controller vision. Overview of the AI Controller vision is available here: https://github.com/manuelbomi/AI-Controller-Strategic-Vision-Roadmap
   
 ---
 
