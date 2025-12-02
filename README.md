@@ -69,7 +69,11 @@
 
 #### <ins>Goal & Purpose</ins>
 
-Provide a repeatable, weighted framework for scoring prospective M&A targets by technology, business, and strategic fit; produce visualizations showing (1) distribution of target categories and strategic rationale, (2) detailed score breakdown across evaluation criteria, and (3) a radar / bar comparison showing where a single target (e.g., TestAI Labs) is strong or weak to support acquisition recommendation.
+Provide a repeatable, weighted framework for scoring prospective M&A targets by technology, business, and strategic fit; produce visualizations showing:
+
+- (1) distribution of target categories and strategic rationale,
+- (2) detailed score breakdown across evaluation criteria, and
+- (3) a radar / bar comparison showing where a single target (e.g., TestAI Labs) is strong or weak to support acquisition recommendation.
 
 
 ```python
